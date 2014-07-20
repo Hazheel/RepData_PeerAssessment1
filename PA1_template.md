@@ -1,14 +1,12 @@
 # Reproducible Research: Peer Assessment 1
 
 
-```{r echo=FALSE}
-require(knitr)
-opts_chunk$set( fig.path = 'figures/' )
-```
+
 
 ## Loading and preprocessing the data
 
-```{r}
+
+```r
 data <- read.csv("activity.csv", stringsAsFactor=FALSE)
 data <- transform(data, date=as.Date(date))
 ```
@@ -17,24 +15,30 @@ data <- transform(data, date=as.Date(date))
 
 ## What is mean total number of steps taken per day?
 
-```{r figure1}
+
+```r
 #Plot
 library("ggplot2")
 obs1 <- aggregate(steps ~ date, data, sum)
 qplot(x=steps, data=obs1, binwidth=500)
+```
 
+![plot of chunk figure1](figures/figure1.png) 
+
+```r
 #Calculation of the mean and median
 options(digits=2, scipen=100)
 obs1.med <- median(obs1$steps)
 obs1.mea <- mean(obs1$steps)
 ```
 
-**mean** total of steps taken each day : `r round(obs1.mea, digits=2)`  
-**median** total of steps taken each day : `r obs1.med`
+**mean** total of steps taken each day : 10766.19  
+**median** total of steps taken each day : 10765
 
 ## What is the average daily activity pattern?
 
-```{r figure2}
+
+```r
 #subset data
 obs2.l <- aggregate(steps~ interval, data, length)
 obs2.s <- aggregate(steps~ interval, data, sum)
@@ -44,19 +48,23 @@ obs2.s$m <- obs2.s$steps/obs2.l$steps
 qplot(x=interval, y=m, data=obs2.s, geom="line", xlab="5 minute interval", ylab="mean steps")
 ```
 
-The **maximum** number of mean steps per interval is `r max(obs2.s$m)` 
+![plot of chunk figure2](figures/figure2.png) 
+
+The **maximum** number of mean steps per interval is 206.17 
 
 ## Imputing missing values
 
-```{r}
+
+```r
 missing <- length(data$steps[is.na(data$steps)])
 ```
 
-There is `r missing` records with missing values in the dataset.
+There is 2304 records with missing values in the dataset.
 
 Let's replace the missing values by the mean of the number of steps for the interval
 
-```{r figure3} 
+
+```r
 #Creation of the new Dataset
 data.nona <- data
 data.nona$nona <- obs2.s$m
@@ -67,20 +75,25 @@ data.nona$nona <- NULL
 obs3 <- aggregate(steps ~ date, data.nona, sum)
 #plot
 qplot(x=steps, data=obs3, binwidth=500)
+```
 
+![plot of chunk figure3](figures/figure3.png) 
+
+```r
 #Calculation of the mean and median
 options(digits=2, scipen=100)
 obs3.med <- median(obs3$steps)
 obs3.mea <- mean(obs3$steps)
 ```
 
-**mean** total of steps taken each day : `r obs3.mea`  
-**median** total of steps taken each day : `r obs3.med`
+**mean** total of steps taken each day : 10766.19  
+**median** total of steps taken each day : 10766.19
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
 
-```{r figure4}
+
+```r
 #create logical column with TRUE when weekend
 data$wd <- as.POSIXlt(data$date)$wday %in% c(0,6)
 #create text column with value "weekday"
@@ -101,3 +114,5 @@ obs4.s$m <- obs4.s$steps/obs4.l$steps
 #plot
 qplot(x=interval, y=m, data=obs4.s, geom="line", xlab="5 minute interval", ylab="mean steps", facets = day.type ~ .)
 ```
+
+![plot of chunk figure4](figures/figure4.png) 
